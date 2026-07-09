@@ -225,16 +225,18 @@ const SAMPLE_ARTICLES = [
 ];
 
 async function main() {
-  const existingCount = await prisma.article.count();
-  if (existingCount > 0) {
-    console.log(`이미 스토리가 ${existingCount}개 있어서 샘플을 건너뛰어요.`);
-    return;
-  }
+  const existing = await prisma.article.findMany({ select: { title: true } });
+  const existingTitles = new Set(existing.map((a) => a.title));
+  const toInsert = SAMPLE_ARTICLES.filter((a) => !existingTitles.has(a.title));
 
-  for (const article of SAMPLE_ARTICLES) {
+  for (const article of toInsert) {
     await prisma.article.create({ data: article });
   }
-  console.log(`${SAMPLE_ARTICLES.length}개의 샘플 스토리를 추가했어요.`);
+  console.log(
+    `${toInsert.length}개의 새 샘플 스토리를 추가했어요. (이미 있던 ${
+      SAMPLE_ARTICLES.length - toInsert.length
+    }개는 건너뜀)`,
+  );
 }
 
 main()
