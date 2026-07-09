@@ -43,5 +43,6 @@ model RecordingAttempt {
   transcript     String
   accuracyScore  Int
   feedback       String?
+  audioData      String?
   createdAt      DateTime     @default(now())
 }

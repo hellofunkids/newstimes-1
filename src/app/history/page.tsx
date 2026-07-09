@@ -47,20 +47,27 @@ export default async function HistoryPage() {
           {attempts.map((attempt) => (
             <div
               key={attempt.id}
-              className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm"
+              className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700">
-                {attempt.accuracyScore}
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700">
+                  {attempt.accuracyScore}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-slate-800">
+                    {attempt.article.title}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {categoryLabel(attempt.article.category)} ·{" "}
+                    {attempt.createdAt.toLocaleDateString("ko-KR")}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-slate-800">
-                  {attempt.article.title}
-                </p>
-                <p className="text-xs text-slate-400">
-                  {categoryLabel(attempt.article.category)} ·{" "}
-                  {attempt.createdAt.toLocaleDateString("ko-KR")}
-                </p>
-              </div>
+              {attempt.audioData && (
+                <audio controls src={attempt.audioData} className="w-full">
+                  <track kind="captions" />
+                </audio>
+              )}
             </div>
           ))}
 

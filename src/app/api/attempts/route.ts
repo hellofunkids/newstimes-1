@@ -10,14 +10,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "프로필을 선택해주세요" }, { status: 401 });
   }
 
-  const { articleId, transcript } = (await request.json().catch(() => ({}))) as {
+  const { articleId, transcript, audioData } = (await request
+    .json()
+    .catch(() => ({}))) as {
     articleId?: string;
     transcript?: string;
+    audioData?: string | null;
   };
 
   if (!articleId || typeof transcript !== "string") {
     return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
   }
+
+  // 너무 긴 녹음은 데이터베이스에 부담을 주므로 저장을 건너뛰어요 (채점/피드백은 정상 진행).
+  const MAX_AUDIO_LENGTH = 5_000_000;
+  const audioToSave =
+    typeof audioData === "string" && audioData.length <= MAX_AUDIO_LENGTH
+      ? audioData
+      : null;
 
   const article = await prisma.article.findUnique({ where: { id: articleId } });
   if (!article) {
@@ -43,6 +53,7 @@ export async function POST(request: Request) {
       transcript,
       accuracyScore: score.accuracy,
       feedback,
+      audioData: audioToSave,
     },
   });
 
