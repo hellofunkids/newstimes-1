@@ -63,6 +63,12 @@ const SAMPLE_ARTICLES = [
 ];
 
 async function main() {
+  const existingCount = await prisma.article.count();
+  if (existingCount > 0) {
+    console.log(`이미 스토리가 ${existingCount}개 있어서 샘플을 건너뛰어요.`);
+    return;
+  }
+
   for (const article of SAMPLE_ARTICLES) {
     await prisma.article.create({ data: article });
   }
