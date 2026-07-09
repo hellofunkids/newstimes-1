@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { levelLabel } from "@/lib/level";
 import { setActiveChildProfile } from "@/lib/activeProfile";
 
 export default async function ProfilesPage() {
-  const session = await auth();
-  if (!session?.parentId) redirect("/login");
-
   const children = await prisma.childProfile.findMany({
-    where: { parentId: session.parentId },
     orderBy: { createdAt: "asc" },
   });
 

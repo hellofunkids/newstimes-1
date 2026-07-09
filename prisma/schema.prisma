@@ -7,19 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Parent {
-  id        String         @id @default(cuid())
-  kakaoId   String         @unique
-  name      String?
-  email     String?
-  children  ChildProfile[]
-  createdAt DateTime       @default(now())
-}
-
 model ChildProfile {
   id        String             @id @default(cuid())
-  parentId  String
-  parent    Parent             @relation(fields: [parentId], references: [id])
   name      String
   level     Level
   avatar    String?
