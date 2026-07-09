@@ -26,6 +26,36 @@ export default function LoginPage() {
         부모님 또는 선생님 계정으로 로그인한 뒤, 아이들 프로필을 여러 개
         만들어 함께 사용할 수 있어요.
       </p>
+
+      <div className="flex w-full max-w-xs items-center gap-3 text-xs text-slate-400">
+        <div className="h-px flex-1 bg-slate-200" />
+        카카오 설정 전 테스트용
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <form
+        action={async (formData: FormData) => {
+          "use server";
+          await signIn("guest", {
+            name: formData.get("name"),
+            redirectTo: "/profiles",
+          });
+        }}
+        className="flex w-full max-w-xs gap-2"
+      >
+        <input
+          name="name"
+          required
+          placeholder="이름 입력 (예: 테스트)"
+          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none"
+        />
+        <button
+          type="submit"
+          className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+        >
+          시작하기
+        </button>
+      </form>
     </main>
   );
 }
