@@ -14,27 +14,37 @@ const LEVEL_PROMPTS: Record<Level, string> = {
     "advanced Korean junior English learners (age 14-16) preparing for exams like NE Times Junior. Use natural, slightly more complex sentences and richer vocabulary, but still clear and readable aloud. 7-10 sentences total.",
 };
 
-type LeveledScript = { title: string; script: string };
+type SentencePair = { en: string; ko: string };
+type VocabWord = { word: string; meaning: string };
+type LeveledContent = {
+  title: string;
+  sentences: SentencePair[];
+  vocabulary: VocabWord[];
+};
 
-async function writeLeveledScript(
-  headline: string,
+async function writeLeveledContent(
+  topic: string,
   description: string,
   level: Level,
-): Promise<LeveledScript> {
+): Promise<LeveledContent> {
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 600,
+    max_tokens: 1200,
     messages: [
       {
         role: "user",
-        content: `A real news headline (for inspiration only): "${headline}" - ${description}
+        content: `Topic inspiration (for reference only, do not copy): "${topic}" - ${description}
 
-Write an ORIGINAL short English news-style reading passage inspired by the topic of this headline, for ${LEVEL_PROMPTS[level]}
+Write an ORIGINAL short English reading passage about this general topic, for ${LEVEL_PROMPTS[level]}
 
-Do NOT copy sentences from the headline/description verbatim. Write new, simple, age-appropriate original sentences about the same general topic. The passage should read naturally out loud for a read-aloud pronunciation practice exercise.
+Do NOT copy sentences from the topic description verbatim. Write new, age-appropriate original sentences. The passage should read naturally out loud for a read-aloud pronunciation practice exercise, for a Korean student learning English.
 
 Respond with ONLY valid JSON, no markdown fences, in this exact shape:
-{"title": "short original title", "script": "the reading passage as plain text"}`,
+{
+  "title": "short original title",
+  "sentences": [{"en": "English sentence", "ko": "정확한 한국어 번역"}, ...],
+  "vocabulary": [{"word": "word taken from the passage", "meaning": "간단한 한국어 뜻"}, ... exactly 5 items]
+}`,
       },
     ],
   });
@@ -44,8 +54,7 @@ Respond with ONLY valid JSON, no markdown fences, in this exact shape:
     .map((block) => block.text)
     .join("");
 
-  const parsed = JSON.parse(text);
-  return { title: parsed.title, script: parsed.script };
+  return JSON.parse(text);
 }
 
 export async function generateArticlesForCategory(category: Category) {
@@ -54,7 +63,7 @@ export async function generateArticlesForCategory(category: Category) {
 
   for (const headline of headlines) {
     for (const level of Object.values(Level)) {
-      const { title, script } = await writeLeveledScript(
+      const { title, sentences, vocabulary } = await writeLeveledContent(
         headline.title,
         headline.description,
         level,
@@ -65,7 +74,9 @@ export async function generateArticlesForCategory(category: Category) {
           level,
           category,
           title,
-          script,
+          script: sentences.map((s) => s.en).join(" "),
+          sentences,
+          vocabulary,
           sourceHeadline: headline.title,
           sourceUrl: headline.url,
         },

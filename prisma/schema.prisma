@@ -28,6 +28,8 @@ model Article {
   category       String
   title          String
   script         String
+  sentences      Json
+  vocabulary     Json
   sourceHeadline String
   sourceUrl      String?
   publishedAt    DateTime           @default(now())
